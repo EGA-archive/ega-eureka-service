@@ -1,0 +1,54 @@
+# Build Ubuntu Base Image
+FROM ubuntu:latest
+
+# For now...
+MAINTAINER Alexander Senf <asenf@ebi.ac.uk>
+
+# ROOT to set up the image
+USER root
+
+# Add a user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
+RUN groupadd -r ega && useradd -r -g ega ega
+
+# Dirs in Docker FS
+RUN mkdir /docker-entrypoint-initdb.d
+RUN mkdir /tmp/monit
+RUN mkdir /etc/temp
+RUN mkdir /etc/EGA_eureka
+
+# Suppress unnecesary warning messages
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+
+# Enable addition of Repositories in Ubuntu
+RUN apt-get update -y && apt-get -y upgrade
+RUN apt-get install -y software-properties-common python-software-properties
+
+# Update Image, and Install Java 8 & Monit
+RUN add-apt-repository ppa:openjdk-r/ppa
+#RUN apt-get -y update
+RUN apt-get -y install openjdk-8-jdk
+RUN apt-get -y install monit
+RUN apt-get -y install git
+RUN apt-get -y install maven
+#RUN apt -y upgrade
+
+# Add Java WAR file to Container (clone from git, build)
+RUN git clone https://github.com/elixir-europe/ega-data-api-v3-eureka /etc/temp && mvn -f /etc/temp/pom.xml install && cp /etc/temp/target/DiscoveryServer-0.0.1-SNAPSHOT.war /etc/EGA_eureka && cp /etc/temp/docker/eurekad.sh /etc/EGA_eureka && cp /etc/temp/docker/monitrc /etc && rm -rf /etc/temp
+#RUN mvn -f /etc/temp/pom.xml install && cp /etc/temp/target/DiscoveryServer-0.0.1-SNAPSHOT.war /etc/EGA_eureka && cp /etc/temp/docker/eurekad.sh /etc/EGA_eureka && cp /etc/temp/docker/monitrc /etc && rm -rf /etc/temp
+#RUN cp /etc/temp/target/DiscoveryServer-0.0.1-SNAPSHOT.war /etc/EGA_eureka
+#RUN cp /etc/temp/docker/eurekad.sh /etc/EGA_eureka
+#RUN cp /etc/temp/docker/monitrc /etc
+
+# Monit - Add Startup file to Image
+#ADD /private/scripts/monitrc /etc/monitrc
+RUN chmod 700 /etc/monitrc
+
+# Clean up
+#RUN rm -rf /etc/temp
+
+# Startup
+CMD monit -d 10 -Ic /etc/monitrc
+
+# Expose Ports to container outside
+EXPOSE 8103 8761
+
