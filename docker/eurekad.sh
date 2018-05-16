@@ -1,8 +1,8 @@
 #!/bin/bash
 SERVICE_NAME=EurekaDiscoveryService
-PATH_TO_JAR=/DiscoveryServer-0.0.1-SNAPSHOT.war
-PROCESSCNT=$(ps x | grep -v grep | grep -c "DiscoveryServer-0.0.1-SNAPSHOT.war")
-PID=$(ps aux | grep "DiscoveryServer-0.0.1-SNAPSHOT.war" | grep -v grep | awk '{print $2}')
+PATH_TO_JAR=/eureka-0.0.1-SNAPSHOT.jar
+PROCESSCNT=$(ps x | grep -v grep | grep -c "eureka-0.0.1-SNAPSHOT.jar")
+PID=$(ps aux | grep "eureka-0.0.1-SNAPSHOT.jar" | grep -v grep | awk '{print $2}')
 case $1 in
     start)
 	if [ $PROCESSCNT == 0 ]; then
@@ -24,4 +24,3 @@ case $1 in
         fi
     ;;
 esac
-

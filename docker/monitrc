@@ -3,11 +3,11 @@
 #
 
 set daemon 30 # Poll at 1/2-minute intervals
-set logfile /etc/monitrc.log
+set logfile /monitapi.log
 set idfile /tmp/id
 set statefile /tmp/state
 set httpd port 8103
-   allow test:test
+   allow ega:egalocal
    
 check system local
    if memory usage > 75% then alert
@@ -24,9 +24,8 @@ check network eth0
 # Process
 #
 
-check process eureka_docker with matching "DiscoveryServer-0.0.1-SNAPSHOT.war"
+check process eureka_docker with matching "eureka-0.0.1-SNAPSHOT.jar"
    group support   
-   start program = "/etc/EGA_eureka/eurekad.sh start"
-   stop program = "/etc/EGA_eureka/eurekad.sh stop"
+   start program = "/etc/eurekad.sh start"
+   stop program = "/etc/eurekad.sh stop"
    if not exist then start
- 
